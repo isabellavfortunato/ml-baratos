@@ -9,3 +9,13 @@
   from = "/api/search"
   to = "/.netlify/functions/search"
   status = 200
+
+[[redirects]]
+  from = "/callback"
+  to = "/.netlify/functions/callback"
+  status = 200
+
+[[redirects]]
+  from = "/authorize"
+  to = "/.netlify/functions/authorize"
+  status = 200
