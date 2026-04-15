@@ -1,8 +1,11 @@
 import { useState } from "react";
 
 const REP = {
-  "5_green":       { label: "Excelente", color: "#00a650" },
+  "5_green":       { label: "Excelente",  color: "#00a650" },
   "4_light_green": { label: "Muito bom",  color: "#7bc324" },
+  "3_yellow":      { label: "Bom",        color: "#f5a623" },
+  "2_orange":      { label: "Regular",    color: "#e67e22" },
+  "1_red":         { label: "Ruim",       color: "#c0392b" },
 };
 
 function formatBRL(v) {
@@ -20,9 +23,24 @@ function Tag({ children, accent }) {
   );
 }
 
+function RepBadge({ levelId }) {
+  const rep = REP[levelId];
+  if (!rep) return (
+    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+      <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#ccc", display: "inline-block" }} />
+      <span style={{ fontSize: 11, color: "#999" }}>Sem reputacao</span>
+    </span>
+  );
+  return (
+    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+      <span style={{ width: 7, height: 7, borderRadius: "50%", background: rep.color, display: "inline-block" }} />
+      <span style={{ fontSize: 11, color: "#777" }}>{rep.label}</span>
+    </span>
+  );
+}
+
 function ProductCard({ item }) {
   const rep = item.seller?.seller_reputation?.level_id;
-  const repInfo = REP[rep];
   const isFree = item.shipping?.free_shipping;
   const isUsed = item.condition === "used";
 
@@ -70,12 +88,7 @@ function ProductCard({ item }) {
           {isFree && <Tag accent>Frete gratis</Tag>}
           {isUsed && <Tag>Usado</Tag>}
         </div>
-        {repInfo && (
-          <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", background: repInfo.color, display: "inline-block" }} />
-            <span style={{ fontSize: 11, color: "#777" }}>{repInfo.label}</span>
-          </span>
-        )}
+        <RepBadge levelId={rep} />
       </div>
     </a>
   );
@@ -149,7 +162,7 @@ function SearchRow({ item, onRemove, onChange, onSearchSingle, canRemove }) {
           )}
           {hasResults && count === 0 && (
             <p style={{ color: "#999", fontSize: 13, margin: 0 }}>
-              Nenhum resultado encontrado com bons vendedores. Tente termos mais amplos.
+              Nenhum resultado encontrado. Tente termos mais amplos.
             </p>
           )}
           {hasResults && count > 0 && (
@@ -170,10 +183,7 @@ async function fetchML(q) {
   const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
   if (!res.ok) throw new Error("Erro na API");
   const data = await res.json();
-  const boas = ["5_green", "4_light_green"];
-  return (data.results || []).filter(
-    item => boas.includes(item.seller?.seller_reputation?.level_id)
-  );
+  return data.results || [];
 }
 
 export default function App() {
@@ -249,7 +259,7 @@ export default function App() {
             </div>
           </div>
           <p style={{ color: "#555", fontSize: 11, margin: 0, letterSpacing: "0.03em" }}>
-            Somente vendedores com boa reputacao, ordenados do mais barato para o mais caro.
+            Todos os vendedores, ordenados do mais barato para o mais caro. Reputacao indicada em cada resultado.
           </p>
         </div>
       </div>
