@@ -27,7 +27,7 @@ function ProductCard({ item }) {
   const isUsed = item.condition === "used";
 
   return (
-    <a
+    
       href={item.permalink}
       target="_blank"
       rel="noopener noreferrer"
