@@ -1,5 +1,3 @@
-import { getStore } from "@netlify/blobs";
-
 export const handler = async function(event) {
   const code = event.queryStringParameters?.code;
 
@@ -32,12 +30,32 @@ export const handler = async function(event) {
       };
     }
 
-    const store = getStore("ml-tokens");
-    await store.setJSON("tokens", {
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      expires_at: Date.now() + tokenData.expires_in * 1000,
-    });
+    const netlifyRes = await fetch(
+      `https://api.netlify.com/api/v1/sites/${process.env.NETLIFY_SITE_ID}/env`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.NETLIFY_TOKEN}`,
+        },
+        body: JSON.stringify([
+          {
+            key: "ML_ACCESS_TOKEN",
+            values: [{ value: tokenData.access_token, context: "production" }],
+          },
+          {
+            key: "ML_REFRESH_TOKEN",
+            values: [{ value: tokenData.refresh_token, context: "production" }],
+          },
+          {
+            key: "ML_TOKEN_EXPIRES_AT",
+            values: [{ value: String(Date.now() + tokenData.expires_in * 1000), context: "production" }],
+          },
+        ]),
+      }
+    );
+
+    console.log("NETLIFY ENV UPDATE:", netlifyRes.status);
 
     return {
       statusCode: 200,
