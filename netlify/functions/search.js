@@ -3,7 +3,6 @@ export const handler = async function(event) {
   if (!q) return { statusCode: 400, body: JSON.stringify({ error: "q obrigatorio" }) };
 
   try {
-    // Obtém token de acesso
     const tokenRes = await fetch("https://api.mercadolibre.com/oauth/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -18,10 +17,12 @@ export const handler = async function(event) {
     const token = tokenData.access_token;
 
     if (!token) {
-      return { statusCode: 500, body: JSON.stringify({ error: "Falha ao obter token", detail: tokenData }) };
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Falha ao obter token", detail: tokenData }),
+      };
     }
 
-    // Faz a busca autenticada
     const url = new URL("https://api.mercadolibre.com/sites/MLB/search");
     url.searchParams.set("q", q);
     url.searchParams.set("sort", "price_asc");
