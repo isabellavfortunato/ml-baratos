@@ -14,6 +14,8 @@ export const handler = async function(event) {
     });
 
     const tokenData = await tokenRes.json();
+    console.log("TOKEN RESPONSE:", JSON.stringify(tokenData).slice(0, 200));
+
     const token = tokenData.access_token;
 
     if (!token) {
@@ -32,13 +34,18 @@ export const handler = async function(event) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
+    console.log("SEARCH STATUS:", searchRes.status);
+
     const text = await searchRes.text();
+    console.log("SEARCH RESPONSE (primeiros 300 chars):", text.slice(0, 300));
+
     return {
       statusCode: 200,
       headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
       body: text,
     };
   } catch (e) {
+    console.log("ERRO:", e.message);
     return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
   }
 };
